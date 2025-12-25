@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nexus Pro Web</title>
+    <style>
+        body { background: #0F0F13; color: #A0A0B8; font-family: 'Segoe UI', sans-serif; text-align: center; }
+        .container { margin-top: 50px; }
+        .log-box { background: #16161E; width: 60%; margin: 20px auto; padding: 20px; height: 300px; overflow-y: scroll; border: 1px solid #2A2A35; text-align: left; font-family: monospace; }
+        .btn { padding: 10px 25px; font-weight: bold; cursor: pointer; border: none; margin: 10px; }
+        .start { background: #00F2FF; color: #0F0F13; }
+        .stop { background: #FF3E3E; color: white; }
+        .status { color: #555566; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <h1>NEXUS PRO <span style="font-size: 0.5em;">WEB MONITOR</span></h1>
+    <div id="status-text" class="status">SYSTEM IDLE</div>
+
+    <div class="container">
+        <button class="btn start" onclick="control('start')">START MONITOR</button>
+        <button class="btn stop" onclick="control('stop')">STOP & SAVE</button>
+    </div>
+
+    <div class="log-box" id="log-display">>> Initialized...</div>
+
+    <script>
+        function control(action) {
+            fetch('/' + action, { method: 'POST' });
+        }
+
+        async function updateLogs() {
+            const response = await fetch('/status');
+            const data = await response.json();
+            
+            document.getElementById('status-text').innerText = data.running ? "● SYSTEM ACTIVE" : "● SYSTEM IDLE";
+            document.getElementById('status-text').style.color = data.running ? "#00FF41" : "#FF3E3E";
+
+            const logBox = document.getElementById('log-display');
+            logBox.innerHTML = data.logs.map(l => `[${l.timestamp}] KEY: ${l.key}<br>`).join('');
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        setInterval(updateLogs, 1000); // Poll every second
+    </script>
+</body>
+</html>
